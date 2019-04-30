@@ -34,7 +34,7 @@ module.exports = {
     let newPost = {
       post_text: req.body.post_text,
       post_image: req.body.post_image,
-      user_id: req.session.passport.user.id
+      user_id: req.body.user_id
     };
     return db.Post
       .create(newPost,{

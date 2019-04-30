@@ -1,35 +1,20 @@
-
-let db = require("../models");
-let passport = require("../config/passport");
+const passport = require('passport');
 
 // Importing all controllers 
 const postController = require('../controllers/post');
 const likesController = require('../controllers/likes');
 const commentController = require('../controllers/comments');
+const userController = require('../controllers/user');
 
-// Importing passport middleware
-let isAuth = require('../config/middleware/isAuthenticated'); 
+const requireToken = passport.authenticate('jwt', {session:false});
 
 module.exports = function(app) {
   
-  app.post("/api/login", passport.authenticate("local"), function(req, res) {
-    res.redirect("/api/timeline");
-  });
-
-  app.post("/api/signup", function(req, res) {
-    console.log(req.body);
-    db.User.create({
-      email: req.body.email,
-      username: req.body.username,
-      password: req.body.password,
-      bio: req.body.bio,
-      avatar: req.body.avatar
-    }).then(function() {
-      res.redirect(307, "/api/login");
-    }).catch(function(err) {
-      console.log(err);
-      res.json(err);
-    });
+  // Authentication routes
+  app.post("/api/signup", userController.register);
+  
+  app.post("/api/login", function(req, res) {
+    res.redirect("/api/posts");
   });
 
   app.get("/api/logout", function(req, res) {
@@ -37,32 +22,24 @@ module.exports = function(app) {
     res.redirect("/api/login");
   });
 
-  app.get("/api/profile", function(req, res) {
-    if (!req.user) {
-      res.json({});
-    }
-    else {
-      res.json({
-        email: req.user.email,
-        username: req.user.username
-      });
-    }
-  });
+  // User related routes
+  app.get('/api/profile/:id', userController.getById);
+  app.put('/api/profile/:id', userController.update);
   
   // Post routes
-  app.get('/api/timeline', postController.list);
-  app.get('/api/post/:id', postController.getById);
-  app.post('/api/post', postController.add);
-  app.delete('/api/post/:id', postController.delete);
+  app.get('/api/posts', postController.list);
+  app.get('/api/posts/:id', postController.getById);
+  app.post('/api/posts', postController.add);
+  app.delete('/api/posts/:id', postController.delete);
   // Likes routes 
-  app.get('/api/profile/likes', likesController.list);
-  app.get('/api/post/:post_id/likes', likesController.getById);
-  app.post('/api/post/:post_id/like', likesController.add);
-  app.put('/api/post/:post_id/like/:id', likesController.update)
+  //app.get('/api/profile/likes', likesController.list);
+  app.get('/api/posts/:post_id/likes', likesController.getById);
+  app.post('/api/posts/:post_id/likes', likesController.add);
+  app.put('/api/posts/:post_id/likes/:id', likesController.update)
   // Comments routes
-  app.get('/api/profile/comments', commentController.list);
-  app.get('/api/post/:post_id/comments', commentController.getById);
-  app.post('/api/post/:post_id/comment', commentController.add);
-  app.put('/api/post/:post_id/comment/:id', commentController.update);
-  app.delete('/api/post/:post_id/comment/:id', commentController.delete);
+  //app.get('/api/profile/comments', commentController.list);
+  app.get('/api/posts/:post_id/comments', commentController.getById);
+  app.post('/api/posts/:post_id/comments', commentController.add);
+  app.put('/api/posts/:post_id/comments/:id', commentController.update);
+  app.delete('/api/posts/:post_id/comments/:id', commentController.delete);
 };

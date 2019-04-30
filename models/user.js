@@ -1,5 +1,6 @@
 'use strict';
-let bcrypt = require("bcrypt-nodejs");
+//? let bcrypt = require("bcrypt-nodejs");
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     email: {
@@ -26,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
 
+  /** 
+   *  Learn sequelize hooks
+   * 
   User.prototype.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
   };
@@ -33,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
   User.addHook("beforeCreate", function(user) {
     user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10), null);
   });
+  */
 
   User.associate = function(models) {
     User.hasMany(models.Post, {

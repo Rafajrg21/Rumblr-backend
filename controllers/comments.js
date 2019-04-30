@@ -6,7 +6,7 @@ module.exports = {
     return db.Comments
       .findAll({
         where: {
-          user_id: req.session.passport.user.id
+          user_id: req.body.user_id
         } 
         },{ include:[
           { model: db.User }
@@ -40,7 +40,8 @@ module.exports = {
     //console.log(req.session)
     let newComment = {
       comment_text: req.body.comment_text,
-      user_id: req.session.passport.user.id,
+      comment_url: req.body.comment_url,
+      user_id: req.body.user_id,
       post_id: req.params.post_id
     };
     return db.Comments
@@ -57,8 +58,8 @@ module.exports = {
     return db.Comments
       .findById(req.params.id, {
         include: [
-            { model: User },
-            { model: Post }
+            { model: db.User },
+            { model: db.Post }
         ],
       })
       .then(comment => {
@@ -69,7 +70,8 @@ module.exports = {
         }
         return comment
           .update({
-            comment_text: req.body.comment_text
+            comment_text: req.body.comment_text,
+            comment_url: req.body.comment_url
           })
           .then(() => res.status(200).send(comment))
           .catch((error) => res.status(400).send(error));

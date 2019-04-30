@@ -1,43 +1,35 @@
-let passport = require("passport");
-let LocalStrategy = require("passport-local").Strategy;
+const passport = require('passport');
+const jwtConfig = require('./jwtConfig');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 
-let db = require("../models");
+// Jwt Strategy Setup
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwtConfig.secret,
+}
 
-passport.use(new LocalStrategy(
-  {
-    usernameField: "email"
-  },
-  function(email, password, done) {
-    
-    db.User.findOne({
+// Create the Jwt Strategy
+const jwtLogin = new JwtStrategy(jwtOptions, (jwt_payload, next) => {
+
+  console.log('payload received', jwt_payload.id);
+
+  return next(null, db.User)
+    .find({
       where: {
-        email: email
+        id: jwt_payload.id
       }
-    }).then(function(dbUser) {
-      
-      if (!dbUser) {
-        return done(null, false, {
-          message: "Incorrect email."
+    })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({
+          message: 'User Not Found',
         });
       }
-      
-      else if (!dbUser.validPassword(password)) {
-        return done(null, false, {
-          message: "Incorrect password."
-        });
-      }
-      
-      return done(null, dbUser);
-    });
-  }
-));
+      return res.status(200).send(user);
+    })
+    .catch((error) => res.status(400).send(error));
 
-passport.serializeUser(function(user, cb) {
-  cb(null, user);
-});
+})
 
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
-});
-
-module.exports = passport;
+passport.use(jwtLogin)

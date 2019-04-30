@@ -6,7 +6,7 @@ module.exports = {
     return db.Likes
       .findAll({
         where: {
-          user_id: req.session.passport.user.id
+          user_id: req.body.user_id
          } 
         },{ 
         include:[
@@ -41,7 +41,7 @@ module.exports = {
     //console.log(req.session)
     let newLike = {
       like_status: req.body.like_status,
-      user_id: req.session.passport.user.id,
+      user_id: req.body.user_id,
       post_id: req.params.post_id
     };
     return db.Likes
