@@ -1,22 +1,22 @@
 // Npm packages necessary for server to work
-let express = require("express");
-let bodyParser = require("body-parser");
-var cors = require('cors')
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require('cors')
+const PORT = process.env.PORT || 3000;
 
-let PORT = process.env.PORT || 3000;
-// Importing the db models folder
+// Importing our models 
 let db = require('./models');
 
 // Creating express app and configuring middleware
-let app = express();
-app.use(bodyParser.urlencoded({ extended: false })); 
+const app = express();
 app.use(bodyParser.json());
-app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: false })); 
+app.use(express.static(__dirname + '/public'));
 
 // Enable cors for all routes
-app.use(cors())
+app.use(cors());
 
-// Requiring our routes
+// Require our routes
 require("./routes/api-routes.js")(app);
 
 // Syncing our database and logging a message to the user upon success

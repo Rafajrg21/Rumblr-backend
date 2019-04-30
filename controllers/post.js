@@ -13,7 +13,7 @@ module.exports = {
 
   getById(req, res) {
     return db.Post
-      .find({
+      .findOne({
         where: {
           id: req.params.id
          } 

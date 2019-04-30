@@ -2,6 +2,7 @@ const passport = require('passport');
 const jwtConfig = require('./jwtConfig');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
+let db = require('../models');
 
 // Jwt Strategy Setup
 const jwtOptions = {
@@ -14,21 +15,18 @@ const jwtLogin = new JwtStrategy(jwtOptions, (jwt_payload, next) => {
 
   console.log('payload received', jwt_payload.id);
 
-  return next(null, db.User)
-    .find({
+  db.User.findOne({
       where: {
         id: jwt_payload.id
       }
     })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({
-          message: 'User Not Found',
-        });
+        console.log('There is no user or token not valid')
       }
-      return res.status(200).send(user);
+      return next(null, user)
     })
-    .catch((error) => res.status(400).send(error));
+    .catch((error) => console.log(error.stack));
 
 })
 
