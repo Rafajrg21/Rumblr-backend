@@ -6,12 +6,9 @@ module.exports = {
     return db.Comments
       .findAll({
         where: {
-          user_id: req.body.user_id
-        } 
-        },{ include:[
-          { model: db.User }
-        ]
-      })
+            post_id: req.params.post_id
+          } 
+        })
       .then((comments) => res.status(200).send(comments))
       .catch((error) => { res.status(400).send(error); });
   },

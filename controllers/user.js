@@ -162,9 +162,31 @@ module.exports = {
         .catch((error) => res.status(400).send(error));
     },
     
-    update(req, res) {
+    getByUsername(req, res) {
       return db.User
-        .findById(req.params.id)
+        .findAll({
+          where: {
+            username: req.params.username
+           } 
+          })
+        .then((users) => {
+          if (!users) {
+            return res.status(404).send({
+              message: 'User Not Found',
+            });
+          }
+          return res.status(200).send(users);
+        })
+        .catch((error) => res.status(400).send(error));
+    },
+
+    updateUser(req, res){
+      return db.User
+      .findOne({
+        where: {
+          id: req.params.id
+         } 
+        })
         .then(user => {
           if (!user) {
             return res.status(404).send({
@@ -173,12 +195,11 @@ module.exports = {
           }
           return user
             .update({
-              bio: req.body.bio
+              bio: req.body.bio,
             })
             .then(() => res.status(200).send(user))
             .catch((error) => res.status(400).send(error));
         })
         .catch((error) => res.status(400).send(error));
-    },
-    
+    }
   };

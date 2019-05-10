@@ -6,42 +6,65 @@ module.exports = {
     return db.Post
       .findAll({ include:
         [{ model: db.User }]
-      })
+      },
+      { order: 
+        [ ['createdAt', 'DESC'] ]
+      },
+      )
       .then((posts) => res.status(200).send(posts))
       .catch((error) => { res.status(400).send(error); });
   },
 
-  getById(req, res) {
-    return db.Post
-      .findOne({
-        where: {
-          id: req.params.id
-         } 
-        })
-      .then((post) => {
-        if (!post) {
+  getByUsername(req, res) {
+    return db.User 
+    .findOne({
+      where: {
+        username: req.body.username 
+       } 
+      })
+      .then((user) => {
+        if (!user) {
           return res.status(404).send({
-            message: 'Post Not Found',
+            message: 'user Not Found',
           });
         }
-        return res.status(200).send(post);
+        return next.status(200).send(user);
       })
       .catch((error) => res.status(400).send(error));
   },
 
-  add(req, res) {
-    //console.log(req.session)
-    let newPost = {
-      post_text: req.body.post_text,
-      post_image: req.body.post_image,
-      user_id: req.body.user_id
-    };
+  getUserPost(req, res){
     return db.Post
-      .create(newPost,{
-        include: [{ model: db.User }]
+    .findAll({
+      where: {
+        user_id: req.params.id 
+       } 
       })
-      .then((post) => {
-        res.status(201).send(post)
+      .then((posts) => {
+        if (!posts) {
+          return res.status(404).send({
+            message: 'posts Not Found',
+          });
+        }
+        return res.status(200).send(posts);
+      })
+      .catch((error) => res.status(400).send(error));
+  },
+
+  getPost(req, res){
+    return db.Post
+    .findAll({
+      where: {
+        id: req.params.post_id 
+       } 
+      })
+      .then((posts) => {
+        if (!posts) {
+          return res.status(404).send({
+            message: 'posts Not Found',
+          });
+        }
+        return res.status(200).send(posts);
       })
       .catch((error) => res.status(400).send(error));
   },
@@ -65,4 +88,20 @@ module.exports = {
       })
       .catch((error) => res.status(400).send(error));
   },
+
+  add(req, res){
+    let newPost = {
+      post_text: req.body.post_text,
+      user_id: req.params.id
+    };
+    return db.Post
+      .create(newPost,{
+        include: [{ model: db.User }]
+      })
+      .then((post) => {
+        res.status(201).send(post)
+      })
+      .catch((error) => res.status(400).send(error));
+  },
+
 };
